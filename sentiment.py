@@ -1,29 +1,26 @@
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from googletrans import Translator
-import tweepy
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-consumer_key = os.environ.get("API-key")
-consumer_secret = os.environ.get("API-secret-key")
-access_token = os.environ.get("access-token")
-access_token_secret = os.environ.get("access-token-secret")
+import twitter_utils
+import plotly.express as px
+import streamlit as st
 
 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth)
+def truncate_date(input_date):
+    return input_date.date()
 
 
-translator = Translator()
+st.title('Análisis de Sentimiento en Twitter')
 
-text = translator.translate(text='esto es un test').text
+authors = ['sanchezcastejon', 'pablocasado_', 'PabloIglesias', 'Santi_ABASCAL', 'InesArrimadas']
+n_tweets = 2
 
-analyser = SentimentIntensityAnalyzer()
-a = analyser.polarity_scores(text)["compound"]
+df = twitter_utils.getting_tweets(authors, n_tweets)
 
-print("The test ",text, "has a sentiment ",a)
+df['Date'] = df.apply(lambda x: truncate_date(x['Date']),axis=1)
 
+df_group = df.groupby(['Date', 'Author']).mean()
+df_group.reset_index(inplace=True)
 
+fig = px.line(df_group, x='Date', y='Score', color='Author', title="Análisis Temporal de Sentimiento Políticos España")
+fig.show()
+
+fig = px.box(df, y="Score", color="Author", title="Análisis de Sentimiento Políticos España")
+fig.show()
