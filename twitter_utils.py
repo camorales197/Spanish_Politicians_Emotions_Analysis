@@ -6,6 +6,7 @@ import re
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from googletrans import Translator
 import pandas as pd
+import streamlit as st
 
 
 def auth_tweeter():
