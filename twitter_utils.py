@@ -66,7 +66,7 @@ def sentiment_analyzer_scores(text):
     sentiment = analyser.polarity_scores(text)["compound"]
     return text, sentiment
 
-@st.cache  # 👈 This function will be cached
+@st.cache(allow_output_mutation=True)  # 👈 This function will be cached
 def getting_tweets(authors, n_tweets):
     authors_list = []
     tweets_list = []

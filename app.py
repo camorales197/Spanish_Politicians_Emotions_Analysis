@@ -10,7 +10,9 @@ def truncate_date(input_date):
 st.title('Análisis de Sentimiento en Twitter')
 
 authors = ['sanchezcastejon', 'pablocasado_', 'PabloIglesias', 'Santi_ABASCAL', 'InesArrimadas']
-n_tweets = st.slider('Tweets de cada cuenta. Un número alto puede hacer que el tiempo de carga exceda los 10 mins', 1, 3000, 10)
+
+n_tweets = st.slider('Tweets de cada cuenta. Un número alto puede hacer que el tiempo de carga exceda los 10 mins',
+                     10, 3000, 10, step=3000)
 
 df = twitter_utils.getting_tweets(authors, n_tweets)
 
@@ -24,3 +26,5 @@ st.write(fig)
 
 fig = px.box(df, y="Score", color="Author", title="Análisis de Sentimiento Políticos España")
 st.write(fig)
+
+st.write(df["Author"].value_counts())
