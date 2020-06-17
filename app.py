@@ -60,12 +60,13 @@ emotion = st.selectbox(' ¿Que emoción te gustaría analizar?',
 
 emotions = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'negative', 'positive', 'sadness', 'surprise', 'trust']
 
-st.write("Veamos que emociones son más utilizadas por cada político")
 fig = px.line(df_emotions_freq, x="Date", y=emotion, color='Author',
                   title='{} Sentiment'.format(emotion.title()),
                  color_discrete_map=colors)
 st.write(fig)
 
+
+st.write("Veamos que políticos utilizan más cada emoción")
 
 df_pivot = df_emotions.groupby(by="Author").mean()
 df_pivot = df_pivot.drop("word_count", axis=1)
@@ -77,5 +78,5 @@ fig = px.bar(df_unpivot, x="Emotions", y="Score", color="Author", color_discrete
 st.write(fig)
 
 
-st.write("Número de tweets analizados por político.")
+#st.write("Número de tweets analizados por político.")
 #st.write(df_sentiment["Author"].value_counts())
