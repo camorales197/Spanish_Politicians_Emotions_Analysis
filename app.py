@@ -10,14 +10,14 @@ image = Image.open('sentiment_table_example.png')
 
 
 st.title('Análisis de Sentimiento para los Principales Políticos en Twitter')
-st.write('En esta página hemos realizado un análisis de sentimiento a los últimos 3200 tweets de cada uno de los principales políticos en España con fecha de 15 de Junio de 2020.')
-st.write('Antes de ponernos a mirar números, vamos a hacer una pequeña introducción al análisis de sentimiento. ',
-         'El análisis de sentimiento es el proceso de determinar el tono emocional que hay detrás de una serie de palabras, y se utiliza para intentar entender las actitudes, opiniones y emociones expresadas.')
+st.write('En esta página se realiza un estudio de análisis de sentimiento a los tweets de los principales políticos en España. Para cada político se han recogido sus últimos 3200 tweets, incluyendo retweets, con fecha de 15 de Junio de 2020.')
+st.write('Antes de ponernos a mirar números, vamos a hacer una pequeña introducción al análisis de sentimientos. ',
+         'Se conoce por análisis de sentimientos al proceso de determinar el tono emocional que hay detrás de una serie de palabras, y se utiliza para intentar entender las actitudes, opiniones y emociones expresadas. ')
 
-st.write(' Seguro que se entiende mejor viendo  los tweets mas positivos y los más negativos: ')
+st.write('Seguro que se entiende mejor viendo ejemplos con los tweets mas positivos y más negativos de este estudio. ')
 st.image(image, caption='Tweets más negativos y más positivos', use_column_width=True)
 st.write("")
-st.write("En la siguiente gráfica se muestran los resultados de clasificar cada tweet en una escala de muy positivo a muy negativo.")
+st.write("En la siguiente gráfica se muestran los resultados de clasificar cada tweet en una escala de muy positivo (1) a muy negativo (-1).")
 
 authors = twitter_utils.authors
 colors = twitter_utils.colors
@@ -41,6 +41,7 @@ st.sidebar.markdown("")
 st.sidebar.markdown("")
 st.sidebar.markdown("Consejo: Si pinchas una vez sobre el nombre de un político en la leyenda, este sale del gráfico. "
                     "Si pinchas dos veces, se queda solo en el gráfico")
+st.sidebar.markdown("Además, en los gráficos temporales puedes seleccionar el periodo que te interese. Si pinchas dos veces sobre el mismo vuelves a la ventana de tiempo original")
 
 #st.write('Has seleccionado:', option)
 
@@ -69,7 +70,8 @@ fig = px.box(df_sentiment, y="Sentiment Score", color="Author", title="Rango de 
 #st.write(fig)
 
 
-st.write("Tambien se pueden analizar las emociones por separado.")
+st.write("Tambien se pueden analizar la intensidad con la que se utilizan las emociones.")
+
 emotion = st.selectbox(' ¿Que emoción te gustaría analizar?',
                       ('anger', 'anticipation', 'disgust', 'fear', 'joy', 'negative', 'positive', 'sadness', 'surprise', 'trust'))
 
@@ -81,7 +83,6 @@ fig = px.line(df_emotions_freq, x="Date", y=emotion, color='Author',
 st.write(fig)
 
 
-st.write("Por último veamos que políticos utilizan más cada emoción.")
 
 df_pivot = df_emotions.groupby(by="Author").mean()
 df_pivot = df_pivot.drop("word_count", axis=1)
@@ -90,6 +91,26 @@ df_unpivot = df_pivot.melt(id_vars=["Author"], var_name='Emotions', value_name='
 df_unpivot.sort_values(by="Score", inplace=True, ascending=False)
 
 fig = px.bar(df_unpivot, x="Emotions", y="Score", color="Author", color_discrete_map=colors)
+#st.write(fig)
+
+
+st.write("A continuación comparamos las emociones más comunes para cada político.")
+politicians = st.multiselect(label='Elige que politicos comparar',
+                      options=authors, default=['sanchezcastejon', 'pablocasado_'])
+
+politicians_df_list = []
+
+for x in politicians:
+    df_unique_pol = df_unpivot[df_unpivot["Author"] == x]
+    politicians_df_list.append(df_unique_pol)
+politicians_df = pd.concat(politicians_df_list)
+
+
+fig = px.bar(politicians_df, x="Emotions", y="Score", color="Author",barmode='group',
+             color_discrete_map=colors)
+fig.update_layout(autosize=True, showlegend=True, legend_orientation="h")
+fig.update_yaxes(visible=True, showticklabels=True)
+fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 st.write(fig)
 
 st.write("")

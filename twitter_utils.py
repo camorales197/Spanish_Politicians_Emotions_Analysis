@@ -6,7 +6,6 @@ import re
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from googletrans import Translator
 import pandas as pd
-import streamlit as st
 
 
 def auth_tweeter():
@@ -113,15 +112,14 @@ def resample_df(data, freq='W'):
     return df2
 
 
-authors = ['sanchezcastejon', 'pablocasado_', 'PabloIglesias', 'Santi_ABASCAL', 'InesArrimadas', 'gabrielrufian']
+authors = ['sanchezcastejon', 'pablocasado_', 'PabloIglesias', 'Santi_ABASCAL', 'InesArrimadas']
 #authors = ['gabrielrufian']
 
-colors = {"InesArrimadas": "rgb(240, 88, 0)",
-          "Santi_ABASCAL": "green",
-          "PabloIglesias": "purple",
-          "sanchezcastejon": "red",
-          "pablocasado_": "blue",
-          "gabrielrufian": "pink"}
+colors = {"InesArrimadas": "rgb(249, 70, 0)",
+          "Santi_ABASCAL": "rgb(80, 184, 47)",
+          "PabloIglesias": "rgb(86, 40, 87)",
+          "sanchezcastejon": "rgb(224, 53, 44)",
+          "pablocasado_": "rgb(1, 72, 137)"}
 
 
 translator = Translator()
