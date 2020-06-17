@@ -23,19 +23,55 @@ def auth_tweeter():
     return api
 
 
-def list_tweets(user_id, count, prt=False):
+#@st.cache()  # 👈 This function will be cached
+def getting_tweets(authors, n_tweets, pages):
+    authors_list = []
+    tweets_list = []
+    scores_list = []
+    dates_list = []
+    x = 3200
+
+    for author in authors:
+        print(author)
+
+        tweets, dates, authors = list_tweets(author, n_tweets, pages)
+        for t in tweets:
+            text, sentiment = sentiment_analyzer_scores(t)
+            tweets_list.append(text)
+            scores_list.append(sentiment)
+            x -= 1
+            print(x)
+        for d in dates:
+            dates_list.append(d)
+        for a in authors:
+            authors_list.append(a)
+
+
+    data = {'Author': authors_list,
+            'Date': dates_list,
+            'Tweet': tweets_list,
+            'Score': scores_list
+            }
+
+    df = pd.DataFrame(data, columns=['Author', 'Date', 'Tweet', 'Score'])
+    print(df)
+    return df
+
+
+def list_tweets(user_id, n_tweets, pages):
     api = auth_tweeter()
-    tweets = api.user_timeline(
-        "@" + user_id, count=count, tweet_mode='extended')
 
     tw = []
     dates = []
     author = []
 
-    for t in tweets:
-        tw.append(t.full_text)
-        dates.append(t.created_at)
-        author.append(user_id)
+    for page in range(pages):
+        tweets = api.user_timeline("@" + user_id, count=n_tweets, tweet_mode='extended', page=page)
+
+        for t in tweets:
+            tw.append(t.full_text)
+            dates.append(t.created_at)
+            author.append(user_id)
     tw_clean = clean_tweets(tw)
     return tw_clean, dates, author
 
@@ -62,36 +98,32 @@ def clean_tweets(lst):
 
 
 def sentiment_analyzer_scores(text):
-    text = translator.translate(text=text).text
-    sentiment = analyser.polarity_scores(text)["compound"]
+    #text = translator.translate(text=text).text
+    #sentiment = analyser.polarity_scores(text)["compound"]
+    sentiment = 0
+    text = text
     return text, sentiment
 
-@st.cache(allow_output_mutation=True)  # 👈 This function will be cached
-def getting_tweets(authors, n_tweets):
-    authors_list = []
-    tweets_list = []
-    scores_list = []
-    dates_list = []
+def resample_df(data, freq='W'):
+    df2 = data.copy()
+    df2["Date"] = pd.to_datetime(df2['Date'])
+    df2.set_index('Date', inplace=True)
+    df2 = df2.groupby('Author').resample(freq).mean()
+    df2.reset_index(inplace=True)
+    return df2
 
-    for author in authors:
-        tweets, dates, authors = list_tweets(author, n_tweets)
-        for t in tweets:
-            text, sentiment = sentiment_analyzer_scores(t)
-            tweets_list.append(text)
-            scores_list.append(sentiment)
-        for d in dates:
-            dates_list.append(d)
-        for a in authors:
-            authors_list.append(a)
 
-    data = {'Author': authors_list,
-            'Date': dates_list,
-            'Tweet': tweets_list,
-            'Score': scores_list
-            }
+#authors = ['sanchezcastejon', 'pablocasado_', 'PabloIglesias', 'Santi_ABASCAL', 'InesArrimadas', 'gabrielrufian']
+authors = ['gabrielrufian']
 
-    df = pd.DataFrame(data, columns=['Author', 'Date', 'Tweet', 'Score'])
-    return df
+
+
+colors = {"InesArrimadas": "orange",
+          "Santi_ABASCAL": "green",
+          "PabloIglesias": "purple",
+          "sanchezcastejon": "red",
+          "pablocasado_": "blue",
+          "gabrielrufian": "pink"}
 
 
 translator = Translator()

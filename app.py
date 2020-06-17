@@ -1,30 +1,48 @@
-import twitter_utils
 import plotly.express as px
 import streamlit as st
+import twitter_utils
+import pandas as pd
 
 
-def truncate_date(input_date):
-    return input_date.date()
+st.title('Análisis de Sentimiento para los Principales Políticos en Twitter')
+st.write('A continuación se pueden ver los resultados de un análisis de sentimiento realizado sobre los últimos tweets de los principales políticos españoles.')
+#st.write('Cada tweet se clasifica de -1 (Muy negativo) a +1 (Muy positivo) pasando por 0 (Neutro).')
+st.write("")
+st.write("")
+
+authors = twitter_utils.authors
+colors = twitter_utils.colors
 
 
-st.title('Análisis de Sentimiento en Twitter')
+freq_dict = {'Hora': 'H', 'Día': 'D', 'Semana': 'W-Mon', 'Mes': 'M', 'Año': 'Y'}
 
-authors = ['sanchezcastejon', 'pablocasado_', 'PabloIglesias', 'Santi_ABASCAL', 'InesArrimadas']
+option = st.selectbox('Para mejorar la visualización temporal, es necesario agrupar los tweets por fechas.'
+                      ' ¿Como te gustaría hacerlo?',
+                      ('Semana', 'Mes', 'Año', 'Hora', 'Día'))
 
-n_tweets = st.slider('Tweets de cada cuenta. Un número alto puede hacer que el tiempo de carga exceda los 10 mins',
-                     10, 3000, 10, step=3000)
+st.write('Has seleccionado:', option)
 
-df = twitter_utils.getting_tweets(authors, n_tweets)
+live_tweeter = False
 
-df['Date'] = df.apply(lambda x: truncate_date(x['Date']),axis=1)
+if live_tweeter:
+    df = twitter_utils.getting_tweets(authors, n_tweets, pages)
+    df.to_csv('last_tweets.csv', mode='a', header=False)
+else:
+    df_sentiment = pd.read_csv("tweets_sentiment_score.csv")
+    df_sentiment = df_sentiment[df_sentiment.Author != 'gabrielrufian']
+    df_emotions = pd.read_csv("tweets_emotions_score.csv")
 
-df_group = df.groupby(['Date', 'Author']).mean()
-df_group.reset_index(inplace=True)
 
-fig = px.line(df_group, x='Date', y='Score', color='Author', title="Análisis Temporal de Sentimiento Políticos España")
+freq_choosen = freq_dict[option]
+df_sentiment_freq = twitter_utils.resample_df(df_sentiment, freq_choosen)
+
+fig = px.line(df_sentiment_freq, x='Date', y='Sentiment Score', color='Author', title="Evolución Temporal de Sentimientos por Político",
+              color_discrete_map=colors)
 st.write(fig)
 
-fig = px.box(df, y="Score", color="Author", title="Análisis de Sentimiento Políticos España")
+fig = px.box(df_sentiment, y="Sentiment Score", color="Author", title="Rango de Sentimiento por Político",
+             color_discrete_map=colors)
 st.write(fig)
 
-st.write(df["Author"].value_counts())
+st.write("Número de tweets analizados por político.")
+st.write(df_sentiment["Author"].value_counts())
