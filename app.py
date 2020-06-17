@@ -18,7 +18,7 @@ freq_dict = {'Hora': 'H', 'Día': 'D', 'Semana': 'W-Mon', 'Mes': 'M', 'Año': 'Y
 
 option = st.selectbox('Para mejorar la visualización temporal, es necesario agrupar los tweets por fechas.'
                       ' ¿Como te gustaría hacerlo?',
-                      ('Semana', 'Mes', 'Año', 'Hora', 'Día'))
+                      ('Mes', 'Año', 'Semana', 'Hora', 'Día'))
 
 st.write('Has seleccionado:', option)
 
@@ -35,6 +35,7 @@ else:
 
 freq_choosen = freq_dict[option]
 df_sentiment_freq = twitter_utils.resample_df(df_sentiment, freq_choosen)
+df_emotions_freq = twitter_utils.resample_df(df_emotions, freq_choosen)
 
 fig = px.line(df_sentiment_freq, x='Date', y='Sentiment Score', color='Author', title="Evolución Temporal de Sentimientos por Político",
               color_discrete_map=colors)
@@ -42,6 +43,19 @@ st.write(fig)
 
 fig = px.box(df_sentiment, y="Sentiment Score", color="Author", title="Rango de Sentimiento por Político",
              color_discrete_map=colors)
+st.write(fig)
+
+
+
+emotion = st.selectbox(' ¿Que emoción te gustaría analizar?',
+                      ('anger', 'anticipation', 'disgust', 'fear', 'joy', 'negative', 'positive', 'sadness', 'surprise', 'trust'))
+
+emotions = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'negative', 'positive', 'sadness', 'surprise', 'trust']
+
+
+fig = px.line(df_emotions_freq, x="Date", y=emotion, color='Author',
+                  title='{} Sentiment'.format(emotion.title()),
+                 color_discrete_map=colors)
 st.write(fig)
 
 st.write("Número de tweets analizados por político.")
