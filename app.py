@@ -31,6 +31,8 @@ else:
     df_sentiment = pd.read_csv("tweets_sentiment_score.csv")
     df_sentiment = df_sentiment[df_sentiment.Author != 'gabrielrufian']
     df_emotions = pd.read_csv("tweets_emotions_score.csv")
+    git  = df_emotions[df_emotions.Author != 'gabrielrufian']
+
 
 
 freq_choosen = freq_dict[option]
