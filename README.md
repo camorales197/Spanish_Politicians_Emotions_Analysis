@@ -4,4 +4,11 @@ Sentiment analysis study to the tweets of the main Spanish Politicians. For each
 
 The insights are published in a public site with dinamyc graphs that allow users to play with the data.
 
+![Example of Graph](example_img.png)
+
 [Site](https://twitter-sentiment-spain.herokuapp.com/) 
+
+
+
+
+
